@@ -3,15 +3,17 @@ from django.http import JsonResponse
 
 from sympy import SympifyError
 
-from .metodos.method_factory import create_method
-from .metodos.ecuaciones_no_lineales.utils import call_eval_f
-from .metodos.ecuaciones_no_lineales.utils import plot_f
+from .numerical_methods.method_factory import createMethod
+from .numerical_methods.one_variable_equations.utils import call_eval_f, plot_f
 import json
 
+def index(request):
+    return JsonResponse({"test": "Hello world"})
+
 @csrf_exempt
-def call_method(request, method_name):
+def methodService(request, method_name):
     try:
-        method = create_method(method_name)
+        method = createMethod(method_name)
         if request.method == 'GET':
             return JsonResponse({'help': method.getHelp()})
         else:

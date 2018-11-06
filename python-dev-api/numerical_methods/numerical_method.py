@@ -1,7 +1,7 @@
 class NumericalMethod(object):
 
-    def calculate(self, parameters):
+    def evaluate(self, parameters):
         return {"error": "Metodo no encontrado"}
 
-    def get_description(self):
+    def getHelp(self):
         return {"error": "Metodo no encontrado"}

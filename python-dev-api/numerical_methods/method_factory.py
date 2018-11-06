@@ -8,7 +8,7 @@ from .one_variable_equations.multiple_roots import MultipleRoots
 from .one_variable_equations.fixed_point import FixedPoint
 from .one_variable_equations.secant import Secant
 
-def create_method(method):
+def createMethod(method):
     method = method.lower()
 
     if method == "incSearch":
