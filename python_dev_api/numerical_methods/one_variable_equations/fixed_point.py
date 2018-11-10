@@ -1,10 +1,10 @@
 from sympy import symbols
 from .utils import sympify_expr
-from ..numeric_method import NumericMethod
+from ..numerical_method import NumericalMethod
 from .utils import error_absoluto, error_relativo
 
 
-class FixedPoint(NumericMethod):
+class FixedPoint(NumericalMethod):
     def calculate(self, parameters):
 
         x = symbols("x")

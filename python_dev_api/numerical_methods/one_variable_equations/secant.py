@@ -1,10 +1,10 @@
 from sympy import symbols
 from .utils import sympify_expr
-from ..numeric_method import NumericMethod
+from ..numerical_method import NumericalMethod
 from .utils import error_absoluto, error_relativo
 
 
-class Secant(NumericMethod):
+class Secant(NumericalMethod):
     def calculate(self, params):
         tol = eval(params["tol"])
         n_iter = eval(params["nIters"])

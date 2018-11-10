@@ -1,10 +1,10 @@
 from sympy import symbols
 from .utils import sympify_expr
 
-from ..numeric_method import NumericMethod
+from ..numerical_method import NumericalMethod
 
 
-class IncrementalSearch(NumericMethod):
+class IncrementalSearch(NumericalMethod):
 
     def calculate(self, parameters):
         # Se crean las variables

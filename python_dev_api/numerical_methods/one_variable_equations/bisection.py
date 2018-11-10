@@ -1,10 +1,11 @@
-from sympy import symbols
 from .utils import sympify_expr
-from ..numeric_method import NumericMethod
 from .utils import error_absoluto, error_relativo
+from sympy import symbols
+
+from ..numerical_method import NumericalMethod
 
 
-class FalsePosition(NumericMethod):
+class Bisection(NumericalMethod):
 
     def calculate(self, parameters):
         # Se crean las variables
@@ -16,7 +17,7 @@ class FalsePosition(NumericMethod):
         xa = float(parameters["xa"])
         xb = float(parameters["xb"])
         n_iter = int(parameters["nIters"])
-        tol = eval(parameters["tol"])
+        tol = eval(parameters["tole"])
         tipo_error = eval(parameters["tipo_error"])
 
         calcular_error = error_relativo if tipo_error == 2 else error_absoluto
@@ -41,17 +42,20 @@ class FalsePosition(NumericMethod):
             response["error"] = "El intervalo es inadecuado"
             return response
 
-        xm = xa - ((fxa*(xb-xa))/(fxb - fxa))  # Ecuación 15, regla falsa
+        xm = (xb+xa)/2
         fxm = f.evalf(subs={x: xm})
         contador = 0
         error = tol + 1
 
         while error > tol and fxm != 0 and contador < n_iter:
             err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
+            # xa_fm = "{xa:.2e}".format(xa=xa)
+            # xb_fm = "{xb:.2e}".format(xb=xb)
+            # xm_fm = "{xm:.2e}".format(xm=xm)
+
             fxm_fm = "{fxm:.2e}".format(fxm=fxm)
 
-            iteracion = \
-                [contador, str(xa), str(xb), str(xm), fxm_fm, err_fm]
+            iteracion = [contador, str(xa), str(xb), str(xm), fxm_fm, err_fm]
 
             response["iteraciones"].append(iteracion)
 
@@ -62,10 +66,11 @@ class FalsePosition(NumericMethod):
                 xa = xm
                 fxa = fxm
             else:
+                # print("error")
                 response["error"] = "Se ha encontrado un error"
 
             x_ant = xm
-            xm = xa - ((fxa*(xb-xa))/(fxb - fxa))  # Ecuación 15, regla falsa
+            xm = (xa+xb)/2
             fxm = f.evalf(subs={x: xm})
             error = calcular_error(xm, x_ant)
             # error = abs(xm - x_ant)
@@ -73,12 +78,13 @@ class FalsePosition(NumericMethod):
 
         err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
         fxm_fm = "{fxm:.2e}".format(fxm=fxm)
-
         iteracion = [contador, str(xa), str(xb), str(xm), fxm_fm, err_fm]
         response["iteraciones"].append(iteracion)
 
         if fxm == 0:
-            response["raices"].append(str(xm))
+            # response["raices"].append(str(xm))
+            response["aproximados"].append(str(xm))
+
             # print(xm, "es raiz")
 
         elif error < tol:
@@ -92,10 +98,8 @@ class FalsePosition(NumericMethod):
         return response
 
     def get_description(self):
-        return "Este metodo se encarga de encontrar una raíz dado un rango donde\
-            haya un cambio de signo, aplicando el metodo de regla falsa", "Se  \
-            necesita funcion, xa, xb, n_iter y tol", "Se necesita funcion, xa, \
-            xb n_iter y tol"
+        return "Este metodo se encarga de encontrar una raíz dado un rango donde \
+        hay un cambio de signo", "Se necesita: funcion, xa, xb, n_iter y tol"
 
     def init_response(self):
         response = dict()
