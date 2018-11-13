@@ -1,4 +1,4 @@
-# JJ Numerical Analysis 2018-2 Ionic
+# JJ Numerical Analysis 2018-2 Ionic Frontend
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@
     ionic cordova build ios
     ```
 
-# JJ Numerical Analysis 2018-2 Ionic
+# JJ Numerical Analysis 2018-2 Python Backend
 
 ## Prerequisites
 
