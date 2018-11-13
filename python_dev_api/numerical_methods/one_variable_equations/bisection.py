@@ -1,5 +1,5 @@
-from .utils import sympify_expr
-from .utils import error_absoluto, error_relativo
+from .one_variable_equations_parent import sympify_expr
+from .one_variable_equations_parent import absolute_error, relative_error
 from sympy import symbols
 
 from ..numerical_method import NumericalMethod
@@ -7,39 +7,33 @@ from ..numerical_method import NumericalMethod
 
 class Bisection(NumericalMethod):
 
-    def calculate(self, parameters):
-        # Se crean las variables
+    def evaluate(self, parameters):
         response = self.init_response()
         x = symbols("x")
 
-        # Extracción de los parametros
         f = str(parameters["fx"])
         xa = float(parameters["xa"])
         xb = float(parameters["xb"])
         n_iter = int(parameters["nIters"])
         tol = eval(parameters["tole"])
-        tipo_error = eval(parameters["tipo_error"])
+        error_type = eval(parameters["error_type"])
 
-        calcular_error = error_relativo if tipo_error == 2 else error_absoluto
+        calculate_error = relative_error if error_type == 2 else absolute_error
 
-        # Transformar f a sympy
         f = sympify_expr(f)
-        response["funcion_in"] = str(f)
+        response["input_function"] = str(f)
 
         fxa = f.evalf(subs={x: xa})
         fxb = f.evalf(subs={x: xb})
 
         if abs(fxa) == 0:
-            response["raices"].append(xa)
-            # print(xa, "es raíz")
+            response["roots"].append(xa)
 
         if abs(fxb) == 0:
-            response["raices"].append(xb)
-            # print(xb, "es raíz")
+            response["roots"].append(xb)
 
         if fxa * fxb > 0:
-            # print("El intervalo es inadecuado")
-            response["error"] = "El intervalo es inadecuado"
+            response["error"] = "Inadequate Interval"
             return response
 
         xm = (xb+xa)/2
@@ -49,15 +43,11 @@ class Bisection(NumericalMethod):
 
         while error > tol and fxm != 0 and contador < n_iter:
             err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
-            # xa_fm = "{xa:.2e}".format(xa=xa)
-            # xb_fm = "{xb:.2e}".format(xb=xb)
-            # xm_fm = "{xm:.2e}".format(xm=xm)
-
             fxm_fm = "{fxm:.2e}".format(fxm=fxm)
 
             iteracion = [contador, str(xa), str(xb), str(xm), fxm_fm, err_fm]
 
-            response["iteraciones"].append(iteracion)
+            response["iterations"].append(iteracion)
 
             if fxa * fxm < 0:
                 xb = xm
@@ -66,46 +56,36 @@ class Bisection(NumericalMethod):
                 xa = xm
                 fxa = fxm
             else:
-                # print("error")
-                response["error"] = "Se ha encontrado un error"
+                response["error"] = "Something went wrong"
 
             x_ant = xm
             xm = (xa+xb)/2
             fxm = f.evalf(subs={x: xm})
-            error = calcular_error(xm, x_ant)
-            # error = abs(xm - x_ant)
+            error = calculate_error(xm, x_ant)
             contador = contador + 1
 
         err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
         fxm_fm = "{fxm:.2e}".format(fxm=fxm)
         iteracion = [contador, str(xa), str(xb), str(xm), fxm_fm, err_fm]
-        response["iteraciones"].append(iteracion)
+        response["iterations"].append(iteracion)
 
         if fxm == 0:
-            # response["raices"].append(str(xm))
-            response["aproximados"].append(str(xm))
-
-            # print(xm, "es raiz")
+            response["aproximations"].append(str(xm))
 
         elif error < tol:
-            response["aproximados"].append(str(xm))
-            # print(xm, "es aproximación a una raíz con una tolerancia =", tol)
+            response["aproximations"].append(str(xm))
 
         else:
-            response["error"] = "El algoritmo fracasó despues de {} \
-                iteraciones".format(n_iter)
+            response["error"] = "The method failed after {} \
+                iterations".format(n_iter)
 
         return response
 
-    def get_description(self):
-        return "Este metodo se encarga de encontrar una raíz dado un rango donde \
-        hay un cambio de signo", "Se necesita: funcion, xa, xb, n_iter y tol"
-
     def init_response(self):
         response = dict()
-        response["raices"] = []
-        response["iteraciones"] = []
-        response["aproximados"] = []
+        response["roots"] = []
+        response["iterations"] = []
+        response["aproximations"] = []
         response["error"] = ""
 
         return response

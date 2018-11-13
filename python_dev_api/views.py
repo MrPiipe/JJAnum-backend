@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from sympy import SympifyError
 
 from .numerical_methods.method_factory import createMethod
-from .numerical_methods.one_variable_equations.utils import call_eval_f, plot_f
+from .numerical_methods.one_variable_equations.one_variable_equations_parent import call_eval_function, plot_function
 import json
 
 def index(request):
@@ -27,11 +27,11 @@ def methodService(request, method_name):
 
 @csrf_exempt
 def evalFunction(request):
-    params = params = json.loads(request.body.decode('UTF-8'))
-    return JsonResponse(evalFunction(params))
+    params = json.loads(request.body.decode('UTF-8'))
+    return JsonResponse(call_eval_function(params))
 
 
 @csrf_exempt
 def plotFunction(request):
-    params = params = json.loads(request.body.decode('UTF-8'))
-    return JsonResponse(plotFunction(params))
+    params = json.loads(request.body.decode('UTF-8'))
+    return JsonResponse(plot_function(params))

@@ -1,27 +1,25 @@
 from sympy import symbols
-from .utils import sympify_expr
+from .one_variable_equations_parent import sympify_expr
 from ..numerical_method import NumericalMethod
-from .utils import error_absoluto, error_relativo
+from .one_variable_equations_parent import absolute_error, relative_error
 
 
 class FixedPoint(NumericalMethod):
-    def calculate(self, parameters):
+    def evaluate(self, parameters):
 
         x = symbols("x")
         response = self.init_response()
 
-        # Extracción de los parametros
         g = str(parameters["fx"])
         xa = float(parameters["x0"])
         n_iter = int(parameters["nIters"])
         tol = eval(parameters["tol"])
-        tipo_error = eval(parameters["tipo_error"])
+        error_type = eval(parameters["error_type"])
 
-        calcular_error = error_relativo if tipo_error == 2 else error_absoluto
+        calculate_error = relative_error if error_type == 2 else absolute_error
 
-        # Transformar g a sympy
         g = sympify_expr(g)
-        response["funcion_in"] = str(g)
+        response["input_function"] = str(g)
 
         contador = 0
         error = tol + 1
@@ -30,34 +28,30 @@ class FixedPoint(NumericalMethod):
             err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
 
             iteracion = [contador, str(xa), err_fm]
-            response["iteraciones"].append(iteracion)
+            response["iterations"].append(iteracion)
 
             xn = g.evalf(subs={x: xa})
 
-            error = calcular_error(xn, xa)
+            error = calculate_error(xn, xa)
 
             xa = xn
             contador = contador + 1
 
         iteracion = [contador, str(xa), str(error)]
-        response["iteraciones"].append(iteracion)
+        response["iterations"].append(iteracion)
 
         if error < tol:
-            response["aproximado"].append(str(xn))
+            response["aproximation"].append(str(xn))
         else:
-            response["error"] = "El método fracasó en {} iteraciones"\
+            response["error"] = "The method failed after {} iterations"\
                 .format(n_iter)
 
         return response
 
-    def get_description(self):
-        return "Este metodo encuentra el punto fijo de una función x = g(x)",
-        "Se necesita funcion, xa, n_iter, y tol"
-
     def init_response(self):
         response = dict()
-        response["iteraciones"] = []
-        response["aproximado"] = []
+        response["iterations"] = []
+        response["aproximation"] = []
         response["error"] = ""
 
         return response

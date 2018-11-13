@@ -1,20 +1,19 @@
 from sympy import symbols
-from .utils import sympify_expr
+from .one_variable_equations_parent import sympify_expr
 from ..numerical_method import NumericalMethod
-from .utils import error_absoluto, error_relativo
+from .one_variable_equations_parent import absolute_error, relative_error
 
 
 class Newton(NumericalMethod):
-
-    def calculate(self, params):
+    def evaluate(self, params):
         tol = eval(params["tol"])
         xa = eval(params["x0"])
         n_iter = eval(params["nIters"])
         f = params["fx"]
         f_prima = params["dfx"]
-        tipo_error = eval(params["tipo_error"])
+        error_type = eval(params["error_type"])
 
-        calcular_error = error_relativo if tipo_error == 2 else error_absoluto
+        calculate_error = relative_error if error_type == 2 else absolute_error
 
         response = self.init_response()
         contador = 0
@@ -24,7 +23,7 @@ class Newton(NumericalMethod):
         f_prima = sympify_expr(f_prima)
         x = symbols("x")
 
-        response["funcion_in"] = str(f)
+        response["input_function"] = str(f)
         response["der_in"] = str(f_prima)
 
         fx = f.evalf(subs={x: xa})
@@ -35,42 +34,37 @@ class Newton(NumericalMethod):
             fx_fm = "{fx:.2e}".format(fx=fx)
 
             iteracion = [contador, str(xa), fx_fm, err_fm]
-            response["iteraciones"].append(iteracion)
+            response["iterations"].append(iteracion)
 
             xn = xa - fx/dfx
             fx = f.evalf(subs={x: xn})
             dfx = f_prima.evalf(subs={x: xn})
 
-            error = calcular_error(xn, xa)
-            # error = abs((xn-xa))
+            error = calculate_error(xn, xa)
             xa = xn
             contador = contador + 1
 
         fx_fm = "{fx:.2e}".format(fx=fx)
         err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
         iteracion = [contador, str(xa), fx_fm, err_fm]
-        response["iteraciones"].append(iteracion)
+        response["iterations"].append(iteracion)
 
         if fx == 0:
-            # response["raiz"] = str(xa)
-            response["aproximado"] = str(xn)
+            # response["root"] = str(xa)
+            response["aproximation"] = str(xn)
         elif error < tol:
-            response["aproximado"] = str(xn)
+            response["aproximation"] = str(xn)
         elif dfx == 0:
-            response["error"] = "{} es una posible raíz multiple".format(xn)
+            response["error"] = "{} is a possible multiple root".format(xn)
         else:
-            response["error"] = "El método fracasó en {} iteraciones"\
+            response["error"] = "The method failed after {} iterations"\
                 .format(n_iter)
 
         return response
 
-    def get_description(self):
-        return "Este metodo encuentra la raiz de una función a través del \
-            metodo de Newton", "Se necesita tol, x0, n_iter, funcion y f_prima"
-
     def init_response(self):
         response = dict()
-        response["iteraciones"] = []
+        response["iterations"] = []
         response["error"] = ""
 
         return response

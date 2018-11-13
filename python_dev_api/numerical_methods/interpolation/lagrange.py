@@ -1,39 +1,57 @@
+import numpy as np
 from sympy import sympify, simplify
 
-
-def lagrange(x, y):
-    n = len(x)
-    result = []
-    equation = ""
-
-    for i in range(0, n):
-        numerator = ""
-        denominator = ""
-        for j in range(0, n):
-            if j is not i:
-                numerator += "(x" + "-" + str(x[j]) + ")*"
-                denominator += ("("+str(x[i]) + "-" + str(x[j]) + ")*")
-        numerator = numerator[:-1]
-        denominator = denominator[:-1]
-        resultAux = str(y[i]) + "*" + numerator + "/" + denominator
-        result.append(resultAux)
-
-    for i in result:
-        equation += "(" + i + ")" + "+"
-    equation = equation[:-1]
-
-    equation = sympify(equation)
-    equation = simplify(equation)
-    return("p(x) = " + str((equation)))
+from ..numerical_method import NumericalMethod
+from ..one_variable_equations import one_variable_equations_parent
 
 
-def main():
-    x = [1.0000, 2.0000, 3.0000, 4.0000, 5.0000,
-        6.0000, 7.0000, 8.0000, 9.0000, 10.0000]
-    y = [0.5949, 0.2622, 0.6028, 0.7112, 0.2217,
-        0.1174, 0.2967, 0.3188, 0.4242, 0.5079]
-    print(lagrange(x, y))
+class Lagrange(NumericalMethod):
+    def evaluate(self, parameters):
+        x = parameters["X"]
+        y = parameters["Y"]
+        x_eval = parameters["eval"]
 
+        x = self.process_params(x)
+        y = self.process_params(y)
 
-if __name__ == '__main__':
-    main()
+        respuesta = ""
+        n = len(x)
+        res = ["" for x in range(n)]
+        numerador = ""
+        denominador = ""
+        polinomio = ""
+
+        for i in range(0, n):
+            numerador = ""
+            denominador = ""
+            for j in range(0, n):
+                if j is not i:
+                    numerador += "(x" + "-" + str(x[j]) + ")*"
+                    denominador += ("("+str(x[i]) + "-" + str(x[j]) + ")*")
+            numerador = numerador[:-1]
+            denominador = denominador[:-1]
+            aux = str(y[i]) + "*(" + numerador + ")/(" + denominador + ")"
+            res[i] = aux
+
+        for i in res:
+            polinomio += "(" + i + ")" + "+"
+        polinomio = polinomio[:-1]
+
+        polinomio = sympify(polinomio)
+        polinomio = simplify(polinomio)
+        polinomio = str(polinomio)
+        respuesta = "p(x) = " + polinomio
+
+        y_eval = one_variable_equations_parent.eval_function(polinomio, x_eval)
+        y_eval = round(eval(y_eval), 2)
+
+        return {"resultingFunction": respuesta, "y_eval": y_eval}
+
+    def process_params(self, array):
+        n = len(array)
+        new_vector = np.zeros(n)
+
+        for i in range(n):
+            new_vector[i] = array[str(i)]
+
+        return new_vector

@@ -1,21 +1,21 @@
 from sympy import symbols
-from .utils import sympify_expr
+from .one_variable_equations_parent import sympify_expr
 from ..numerical_method import NumericalMethod
-from .utils import error_absoluto, error_relativo
+from .one_variable_equations_parent import absolute_error, relative_error
 
 
 class MultipleRoots(NumericalMethod):
 
-    def calculate(self, params):
+    def evaluate(self, params):
         tol = eval(params["tol"])
         xa = eval(params["x0"])
         n_iter = eval(params["nIters"])
         f = params["fx"]
         f_prima = params["dfx"]
         f_dos_prima = params["d2fx"]
-        tipo_error = eval(params["tipo_error"])
+        error_type = eval(params["error_type"])
 
-        calcular_error = error_relativo if tipo_error == 2 else error_absoluto
+        calculate_error = relative_error if error_type == 2 else absolute_error
 
         response = self.init_response()
         contador = 0
@@ -26,9 +26,9 @@ class MultipleRoots(NumericalMethod):
         f_prima = sympify_expr(f_prima)
         f_dos_prima = sympify_expr(f_dos_prima)
 
-        response["funcion_in"] = str(f)
-        response["f_prima"] = str(f_prima)
-        response["f_dos_prima"] = str(f_dos_prima)
+        response["input_function"] = str(f)
+        response["prime_f"] = str(f_prima)
+        response["double_prime_f"] = str(f_dos_prima)
 
         fx = f.evalf(subs={x: xa})
         dfx = f_prima.evalf(subs={x: xa})
@@ -43,7 +43,7 @@ class MultipleRoots(NumericalMethod):
 
             iteracion = [contador, str(xa), fx_fm, err_fm]
 
-            response["iteraciones"].append(iteracion)
+            response["iterations"].append(iteracion)
 
             xn = xa - (fx*dfx)/denominador
 
@@ -52,38 +52,32 @@ class MultipleRoots(NumericalMethod):
             d2fx = f_dos_prima.evalf(subs={x: xn})
             denominador = (dfx**2)-(fx*d2fx)
 
-            error = calcular_error(xn, xa)
+            error = calculate_error(xn, xa)
             xa = xn
             contador = contador + 1
 
         fx_fm = "{fx:.2e}".format(fx=fx)
         err_fm = "{e:.2e}".format(e=error) if contador != 0 else ""
         iteracion = [contador, str(xa), fx_fm, err_fm]
-        response["iteraciones"].append(iteracion)
+        response["iterations"].append(iteracion)
 
         if fx == 0:
-            # response["raiz"] = str(xa)
-            response["aproximado"] = str(xn)
+            response["aproximation"] = str(xn)
 
         elif error < tol:
-            response["aproximado"] = str(xn)
+            response["aproximation"] = str(xn)
         elif denominador == 0:
-            response["error"] = "Denominador es igual a cero"
+            response["error"] = "Denominator is 0"
 
         else:
-            response["error"] = "El método fracasó en {} iteraciones"\
+            response["error"] = "The method failed after {} iterations"\
                 .format(n_iter)
 
         return response
 
-    def get_description(self):
-        return "Este metodo encuentra la raiz de una función aún si tiene \
-            raices multiples", "Se necesita tol, x0, n_iter, funcion, f_prima y \
-            f_dos_prima"
-
     def init_response(self):
         response = dict()
-        response["iteraciones"] = []
+        response["iterations"] = []
         response["error"] = ""
 
         return response

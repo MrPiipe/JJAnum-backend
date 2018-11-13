@@ -1,60 +1,52 @@
 import numpy as np
+from ..numerical_method import NumericalMethod
+from .interpolation_parent import process_params
+from ..one_variable_equations import one_variable_equations_parent
 
 
-def function(resultingEquation):
-    n = len(resultingEquation)
-    resultingFunction = "p(x) = "
-    for i in range(n-1):
-        resultingFunction = resultingFunction + \
-            str(resultingEquation[i]) + "x^" + str(n-i-1) + " + "
+class Vandermonde(NumericalMethod):
+    def evaluate(self, parameters):
+        X = parameters["X"]
+        Y = parameters["Y"]
+        x_eval = parameters["eval"]
 
-    resultingFunction = resultingFunction + str(resultingEquation[n-1])
-    return resultingFunction
+        puntos = process_params(X, Y)
 
+        n = len(puntos)
+        matriz_vandermonde = []
 
-def equation(x, n):
-    resultingEquation = []
-    for i in range(n-1, -1, -1):
-        resultingEquation.append(x**i)
+        for i in range(n):
+            x = puntos[i][0]
+            fila = self.generate_equation(x, n)
+            matriz_vandermonde.append(fila)
 
-    return np.array(resultingEquation)
+        matriz_vandermonde = np.array(matriz_vandermonde)
+        b = puntos[:, 1].copy()
 
+        vector_a = np.linalg.solve(matriz_vandermonde, b)
+        funcion = self.generate_function(np.round(vector_a, 4))
+        y_eval = one_variable_equations_parent.eval_function(funcion[7:], x_eval)
 
-def vandermonde(arrayPoints):
-    arrayPoints = np.array(arrayPoints)
-    n = len(arrayPoints)
-    vandermondeMatrix = []
+        return {
+            "resultingFunction": funcion,
+            "matrix": np.round(matriz_vandermonde, 4).tolist(),
+            "y_eval": round(eval(y_eval), 2)
+            }
 
-    for i in range(n):
-        x = arrayPoints[i][0]
-        y = arrayPoints[i][1]
-        fila = equation(x, n)
-        vandermondeMatrix.append(fila)
+    def generate_function(self, coeficientes):
+        n = len(coeficientes)
+        funcion = "p(x) = "
+        for i in range(n-1):
+            if coeficientes[i] == 0.0:
+                continue
+            funcion = funcion + str(coeficientes[i]) + "*x^" + str(n-i-1) + " + "
 
-    vandermondeMatrix = np.array(vandermondeMatrix)
-    vectorB = arrayPoints[:, 1].copy()
+        funcion = funcion + str(coeficientes[n-1])
+        return funcion
 
-    print(vandermondeMatrix)
-    # print(vectorB)
-    vectorA = np.linalg.solve(vandermondeMatrix, vectorB)
-    resultingFunction = function(np.round(vectorA, 4))
-    return resultingFunction
+    def generate_equation(self, x, n):
+        coeficientes = []
+        for i in range(n-1, -1, -1):
+            coeficientes.append(x**i)
 
-
-def main():
-    arrayPoints = [[1.0000, 0.5949],
-                   [2.0000, 0.2622],
-                   [3.0000, 0.6028],
-                   [4.0000, 0.7112],
-                   [5.0000, 0.2217],
-                   [6.0000, 0.1174],
-                   [7.0000, 0.2967],
-                   [8.0000, 0.3188],
-                   [9.0000, 0.4242],
-                   [10.0000, 0.5079]]
-
-    print(vandermonde(arrayPoints))
-
-
-if __name__ == '__main__':
-    main()
+        return np.array(coeficientes)

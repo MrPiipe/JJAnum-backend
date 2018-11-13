@@ -1,56 +1,53 @@
 import numpy as np
-from math import exp, log
+from ..numerical_method import NumericalMethod
+from .interpolation_parent import process_params
+from ..one_variable_equations import one_variable_equations_parent
 
 
-def function(matrix, arrayPoints):
-    resultingFunction = "p(x) = "
-    result = []
-    for i in range(len(matrix)):
-        if i != 0:
-            x = np.round(arrayPoints[i-1, 0], 2)
-            result.append("(x - {x})".format(x=x))
+class NewtonInterpolation(NumericalMethod):
+    def evaluate(self, parameters):
+        X = parameters["X"]
+        Y = parameters["Y"]
+        x_eval = parameters["eval"]
 
-        const = np.round(matrix[i, i+1], 3)
-        resultingFunction += str(const) + "".join(result) + " + "
+        puntos = process_params(X, Y)
 
-    resultingFunction = resultingFunction[:-3]
-    return resultingFunction
+        n = len(puntos)
 
+        matrix = np.zeros((n, n+1))
+        for i in range(n):
+            matrix[i, 0] = puntos[i, 0]
+            matrix[i, 1] = puntos[i, 1]
 
-def newton(arrayPoints):
-    n = len(arrayPoints)
-    arrayPoints = np.matrix(arrayPoints)
-    matrix = np.zeros((n, n+1))
-    for i in range(n):
-        matrix[i, 0] = arrayPoints[i, 0]
-        matrix[i, 1] = arrayPoints[i, 1]
+        k = 1
+        for i in range(2, n+1):
+            for j in range(i, n+1):
+                fxk_1 = matrix[j-1-1, i-1]
+                fxk = matrix[j-1, i-1]
 
-    k = 1
-    for i in range(2, n+1):
-        for j in range(i, n+1):
-            fxk1 = matrix[j-1-1, i-1]
-            fxk = matrix[j-1, i-1]
-            xk1 = matrix[j-1, 0]
-            xk = matrix[j-1-k, 0]
-            matrix[j-1, i] = (fxk - fxk1) / (xk1 - xk)
-        k += 1
+                xk_1 = matrix[j-1, 0]
+                xk = matrix[j-1-k, 0]
 
-    return function(matrix, arrayPoints)
+                matrix[j-1, i] = (fxk - fxk_1) / (xk_1 - xk)
+            k += 1
 
+        funcion = self.generate_equation(matrix, puntos)
+        y_eval = one_variable_equations_parent.eval_function(funcion[7:], x_eval)
+        return {"resultingFunction": funcion, "y_eval": y_eval}
 
-def main():
-    arrayPoints = [[1.0000, 0.5949],
-                   [2.0000, 0.2622],
-                   [3.0000, 0.6028],
-                   [4.0000, 0.7112],
-                   [5.0000, 0.2217],
-                   [6.0000, 0.1174],
-                   [7.0000, 0.2967],
-                   [8.0000, 0.3188],
-                   [9.0000, 0.4242],
-                   [10.0000, 0.5079]]
-    print(newton(arrayPoints))
+    def generate_equation(self, matrix, puntos):
+        funcion = "p(x) = "
 
+        xs = []
+        for i in range(len(matrix)):
+            if i != 0:
+                x = np.round(puntos[i-1, 0], 2)
+                xs.append("*(x - {x})".format(x=x))
 
-if __name__ == '__main__':
-    main()
+            const = np.round(matrix[i, i+1], 3)
+
+            if const == 0:
+                continue
+            funcion += str(const) + "".join(xs) + " + "
+
+        return funcion[:-3]
