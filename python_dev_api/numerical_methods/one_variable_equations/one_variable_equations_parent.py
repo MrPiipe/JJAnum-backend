@@ -47,7 +47,7 @@ def eval_function(f, x0):
 
 
 def sympify_expr(f):
-    if "e" in f:
-        f = f.replace("e", "E")
+    # if "e" in f:
+    #     f = f.replace("e", "E")
 
     return sympify(f)
