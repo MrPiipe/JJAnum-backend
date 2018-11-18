@@ -50,8 +50,8 @@ class Seidel(NumericalMethod):
         if dispersion < tol:
             response["aproximations"].append(x1.tolist())
         else:
-            response["error"] = " The method failed after {} \
-                iterations".format(iteraciones)
+            response["error"] = "The method failed after {} \
+                iterations, the method diverges".format(iteraciones)
 
         return response
 

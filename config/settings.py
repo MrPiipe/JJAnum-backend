@@ -1,4 +1,3 @@
-import django_heroku
 """
 Django settings for python_dev_api project.
 
@@ -26,7 +25,7 @@ SECRET_KEY = '03jd4h1jfi=ggl5y1w!8wi%u&(+rbg4&zl*xs7^#6u$r2py4u='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [*]
 
 
 # Application definition
@@ -123,4 +122,3 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-django_heroku.settings(locals())
